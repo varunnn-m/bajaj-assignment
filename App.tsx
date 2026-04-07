@@ -34,7 +34,7 @@ function AppShell() {
   const lastSyncEvent = useSyncStore(state => state.lastSyncEvent);
 
   const scanDevices = Object.values(scannedDevices).sort(
-    (left, right) => (right.rssi ?? -999) - (left.rssi ?? -999),
+    (left, right) => left.discoveredAt - right.discoveredAt,
   );
   const pairedDevices = Object.values(pairedDevicesMap).sort(
     (left, right) => right.pairedAt - left.pairedAt,
@@ -48,10 +48,6 @@ function AppShell() {
         <View style={styles.header}>
           <Text style={styles.headerEyebrow}>Bajaj Assignment</Text>
           <Text style={styles.headerTitle}>BLE Device Manager</Text>
-          <Text style={styles.headerSubtitle}>
-            Onboard IoT peripherals, keep local pairing state reliable, and replay cloud
-            sync safely when connectivity comes back.
-          </Text>
         </View>
 
         <SectionTabs value={tab} onChange={setTab} />
@@ -60,6 +56,7 @@ function AppShell() {
           {tab === 'scan' ? (
             <ScanScreen
               devices={scanDevices}
+              pairedDeviceIds={pairedDevices.map(device => device.id)}
               isScanning={isScanning}
               connectingDeviceId={connectingDeviceId}
               lastBleError={lastBleError}
@@ -69,6 +66,15 @@ function AppShell() {
               }}
               onStopScan={endScan}
               onPair={device => {
+                const isAlreadyPaired = pairedDevices.some(
+                  pairedDevice => pairedDevice.id === device.id,
+                );
+
+                if (isAlreadyPaired) {
+                  unpairDevice(device.id).catch(() => undefined);
+                  return;
+                }
+
                 pairDevice(device).catch(() => undefined);
               }}
               onOpenSettings={() => {
@@ -133,12 +139,6 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     fontWeight: '800',
     color: '#13324b',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: '#526579',
-    maxWidth: 580,
   },
   screenArea: {
     flex: 1,

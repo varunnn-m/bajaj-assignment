@@ -12,11 +12,11 @@ export type PermissionState =
 export interface ScannedDevice {
   id: string;
   name: string;
-  localName: string | null;
   rssi: number | null;
   serviceUUIDs: string[];
   isConnectable: boolean | null;
   manufacturerData: string | null;
+  discoveredAt: number;
   lastSeenAt: number;
 }
 

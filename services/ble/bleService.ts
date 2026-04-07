@@ -18,22 +18,28 @@ function normalizeServiceUUIDs(serviceUUIDs: string[] | null | undefined): strin
 }
 
 export function toScannedDevice(device: Device): ScannedDevice {
+  const now = Date.now();
+
   return {
     id: device.id,
-    name: device.name ?? device.localName ?? 'Unnamed BLE Device',
-    localName: device.localName,
+    name: device.name ?? 'Unnamed BLE Device',
     rssi: device.rssi ?? null,
     serviceUUIDs: normalizeServiceUUIDs(device.serviceUUIDs),
     isConnectable: device.isConnectable ?? null,
     manufacturerData: device.manufacturerData ?? null,
-    lastSeenAt: Date.now(),
+    discoveredAt: now,
+    lastSeenAt: now,
   };
 }
 
-export function toPairedDevice(device: Device): PairedDevice {
+export function toPairedDevice(
+  device: Device,
+  scanned?: ScannedDevice
+): PairedDevice {
   return {
     id: device.id,
-    name: device.name ?? device.localName ?? 'Unnamed BLE Device',
+    name: scanned?.name || device.name || 'Unnamed BLE Device',
+
     serviceUUIDs: normalizeServiceUUIDs(device.serviceUUIDs),
     pairedAt: Date.now(),
     lastSeenAt: Date.now(),
@@ -66,7 +72,10 @@ export function stopBleScan(): void {
   bleManager.stopDeviceScan();
 }
 
-export async function connectToPeripheral(deviceId: string): Promise<PairedDevice> {
+export async function connectToPeripheral(
+  deviceId: string,
+  scannedDevice?: ScannedDevice
+): Promise<PairedDevice> {
   const connectedDevice = await bleManager.connectToDevice(deviceId, {
     autoConnect: false,
     timeout: BLE_CONNECTION_TIMEOUT_MS,
@@ -86,7 +95,7 @@ export async function connectToPeripheral(deviceId: string): Promise<PairedDevic
   const discoveredDevice =
     await connectedDevice.discoverAllServicesAndCharacteristics();
 
-  return toPairedDevice(discoveredDevice);
+  return toPairedDevice(discoveredDevice, scannedDevice);
 }
 
 export async function disconnectFromPeripheral(deviceId: string): Promise<void> {

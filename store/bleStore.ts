@@ -3,6 +3,22 @@ import { create } from 'zustand';
 
 import { ScannedDevice } from '../types/device';
 
+export function upsertScannedDeviceRecord(
+  scannedDevices: Record<string, ScannedDevice>,
+  device: ScannedDevice,
+): Record<string, ScannedDevice> {
+  const existingDevice = scannedDevices[device.id];
+
+  return {
+    ...scannedDevices,
+    [device.id]: {
+      ...existingDevice,
+      ...device,
+      discoveredAt: existingDevice?.discoveredAt ?? device.discoveredAt,
+    },
+  };
+}
+
 interface BleStoreState {
   scannedDevices: Record<string, ScannedDevice>;
   isScanning: boolean;
@@ -25,13 +41,7 @@ export const useBleStore = create<BleStoreState>(set => ({
   lastBleError: null,
   upsertScannedDevice: device =>
     set(state => ({
-      scannedDevices: {
-        ...state.scannedDevices,
-        [device.id]: {
-          ...state.scannedDevices[device.id],
-          ...device,
-        },
-      },
+      scannedDevices: upsertScannedDeviceRecord(state.scannedDevices, device),
     })),
   clearScanResults: () => set({scannedDevices: {}}),
   setScanning: isScanning => set({isScanning}),

@@ -25,35 +25,40 @@ export function PairedDevicesScreen({
 }) {
   return (
     <View style={styles.container}>
-      <View style={styles.summaryCard}>
-        <View>
-          <Text style={styles.summaryTitle}>Paired fleet snapshot</Text>
-          <Text style={styles.summaryText}>
-            {devices.length} paired devices · {queuedActions} queued sync action
-            {queuedActions === 1 ? '' : 's'}
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.networkPill,
-            isOnline ? styles.onlinePill : styles.offlinePill,
-          ]}>
-          <Text
-            style={[
-              styles.networkPillText,
-              isOnline ? styles.onlineText : styles.offlineText,
-            ]}>
-            {isOnline ? 'Online' : 'Offline'}
-          </Text>
-        </View>
-      </View>
-
-      {lastSyncEvent ? <Text style={styles.eventText}>{lastSyncEvent}</Text> : null}
-
       <FlatList
         data={devices}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <View style={styles.summaryCard}>
+              <View>
+                <Text style={styles.summaryTitle}>Paired fleet snapshot</Text>
+                <Text style={styles.summaryText}>
+                  {devices.length} paired devices
+                </Text>
+                <Text style={styles.summaryText}>
+                  {queuedActions} queued sync action{queuedActions === 1 ? '' : 's'}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.networkPill,
+                  isOnline ? styles.onlinePill : styles.offlinePill,
+                ]}>
+                <Text
+                  style={[
+                    styles.networkPillText,
+                    isOnline ? styles.onlineText : styles.offlineText,
+                  ]}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+            </View>
+
+            {lastSyncEvent ? <Text style={styles.eventText}>{lastSyncEvent}</Text> : null}
+          </View>
+        }
         renderItem={({item}) => (
           <View style={styles.itemWrap}>
             <DeviceCard variant="paired" device={item} onPress={() => onUnpair(item.id)} />
@@ -82,7 +87,10 @@ export function PairedDevicesScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerContent: {
     gap: 16,
+    marginBottom: 16,
   },
   summaryCard: {
     backgroundColor: '#ffffff',
@@ -130,6 +138,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     gap: 14,
+    flexGrow: 1,
     paddingBottom: 40,
   },
   itemWrap: {

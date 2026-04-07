@@ -135,7 +135,7 @@ export function useBLE() {
     setBleError(null);
 
     try {
-      const pairedDevice = await connectToPeripheral(device.id);
+      const pairedDevice = await connectToPeripheral(device.id, device);
       upsertPairedDevice({
         ...pairedDevice,
         name: device.name,

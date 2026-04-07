@@ -15,6 +15,7 @@ import { ScannedDevice } from '../types/device';
 
 export function ScanScreen({
   devices,
+  pairedDeviceIds,
   isScanning,
   connectingDeviceId,
   lastBleError,
@@ -25,6 +26,7 @@ export function ScanScreen({
   onOpenSettings,
 }: {
   devices: ScannedDevice[];
+  pairedDeviceIds: string[];
   isScanning: boolean;
   connectingDeviceId: string | null;
   lastBleError: string | null;
@@ -52,63 +54,71 @@ export function ScanScreen({
 
   return (
     <View style={styles.container}>
-      <View style={styles.hero}>
-        <Text style={styles.eyebrow}>BLE Onboarding</Text>
-        <Text style={styles.title}>Discover nearby field devices</Text>
-        <Text style={styles.subtitle}>
-          Scanning all nearby BLE devices. Optionally filter by service UUID prefix.
-        </Text>
-        <View style={styles.controlsRow}>
-          <Pressable
-            style={[styles.primaryButton, isScanning && styles.secondaryButton]}
-            onPress={isScanning ? onStopScan : onStartScan}>
-            <Text
-              style={[
-                styles.primaryButtonText,
-                isScanning && styles.secondaryButtonText,
-              ]}>
-              {isScanning ? 'Stop Scan' : 'Start Scan'}
-            </Text>
-          </Pressable>
-          <View style={styles.scanPill}>
-            <Text style={styles.scanPillText}>
-              Current status: {isScanning ? 'Scanning live' : 'Idle'}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {permissionBlocked ? (
-        <PermissionNotice
-          title={APP_COPY.bluetoothPermissionTitle}
-          message={APP_COPY.bluetoothPermissionMessage}
-          onPress={onOpenSettings}
-        />
-      ) : null}
-
-      {lastBleError ? <Text style={styles.errorText}>{lastBleError}</Text> : null}
-
-      {deferredDevices.length > 0 ? (
-        <TextInput
-          value={uuidFilter}
-          onChangeText={setUuidFilter}
-          placeholder="Filter by UUID prefix"
-          placeholderTextColor="#7b8da1"
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={styles.filterInput}
-        />
-      ) : null}
-
       <FlatList
         data={filteredDevices}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          <View style={styles.headerContent}>
+            <View style={styles.hero}>
+              <Text style={styles.eyebrow}>BLE Onboarding</Text>
+              <Text style={styles.title}>Discover nearby field devices</Text>
+              <Text style={styles.subtitle}>
+                Scanning all nearby BLE devices. Optionally filter by service UUID prefix.
+              </Text>
+              <View style={styles.controlsRow}>
+                <Pressable
+                  style={[styles.primaryButton, isScanning && styles.secondaryButton]}
+                  onPress={isScanning ? onStopScan : onStartScan}>
+                  <Text
+                    style={[
+                      styles.primaryButtonText,
+                      isScanning && styles.secondaryButtonText,
+                    ]}>
+                    {isScanning ? 'Stop Scan' : 'Start Scan'}
+                  </Text>
+                </Pressable>
+                <View style={styles.scanPill}>
+                  <Text style={styles.scanPillText}>
+                    Status: {isScanning ? 'Scanning live' : 'Idle'}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.helperText}>
+                Devices stay in discovery order while signal strength updates live.
+              </Text>
+            </View>
+
+            {permissionBlocked ? (
+              <PermissionNotice
+                title={APP_COPY.bluetoothPermissionTitle}
+                message={APP_COPY.bluetoothPermissionMessage}
+                onPress={onOpenSettings}
+              />
+            ) : null}
+
+            {lastBleError ? <Text style={styles.errorText}>{lastBleError}</Text> : null}
+
+            {deferredDevices.length > 0 ? (
+              <TextInput
+                value={uuidFilter}
+                onChangeText={setUuidFilter}
+                placeholder="Filter by UUID prefix"
+                placeholderTextColor="#7b8da1"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={styles.filterInput}
+              />
+            ) : null}
+          </View>
+        }
         renderItem={({item}) => (
           <DeviceCard
             variant="scan"
             device={item}
             loading={connectingDeviceId === item.id}
+            actionLabel={pairedDeviceIds.includes(item.id) ? 'Unpair device' : 'Tap to pair'}
             onPress={() => onPair(item)}
           />
         )}
@@ -129,7 +139,10 @@ export function ScanScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  headerContent: {
     gap: 16,
+    marginBottom: 16,
   },
   hero: {
     backgroundColor: '#0d2a3c',
@@ -153,6 +166,11 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#d8e8f5',
     lineHeight: 20,
+  },
+  helperText: {
+    color: '#b8d3e8',
+    lineHeight: 18,
+    fontSize: 12,
   },
   controlsRow: {
     flexDirection: 'row',
@@ -205,6 +223,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     gap: 12,
+    flexGrow: 1,
     paddingBottom: 40,
   },
   emptyState: {

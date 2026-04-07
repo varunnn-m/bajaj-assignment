@@ -16,6 +16,7 @@ type DeviceCardProps =
       variant: 'scan';
       device: ScannedDevice;
       loading?: boolean;
+      actionLabel?: string;
       onPress: () => void;
     }
   | {
@@ -28,6 +29,7 @@ type DeviceCardProps =
 export function DeviceCard(props: DeviceCardProps) {
   const {device, loading = false, onPress, variant} = props;
   const isPaired = variant === 'paired';
+  const actionLabel = variant === 'scan' ? props.actionLabel ?? 'Tap to pair' : null;
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -53,7 +55,7 @@ export function DeviceCard(props: DeviceCardProps) {
         {isPaired ? (
           <SyncStatusBadge status={device.syncStatus} />
         ) : (
-          <Text style={styles.actionText}>Tap to pair</Text>
+          <Text style={styles.actionText}>{actionLabel}</Text>
         )}
       </View>
     </Pressable>
