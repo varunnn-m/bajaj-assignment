@@ -43,8 +43,6 @@ function AppShell() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <View style={styles.backgroundOrbTop} />
-      <View style={styles.backgroundOrbBottom} />
 
       <View style={styles.content}>
         <View style={styles.header}>
@@ -149,26 +147,6 @@ const styles = StyleSheet.create({
     color: '#526579',
     textAlign: 'center',
     marginBottom: 6,
-  },
-  backgroundOrbTop: {
-    position: 'absolute',
-    top: -60,
-    right: -20,
-    width: 180,
-    height: 180,
-    borderRadius: 999,
-    backgroundColor: '#c7f1da',
-    opacity: 0.7,
-  },
-  backgroundOrbBottom: {
-    position: 'absolute',
-    bottom: 20,
-    left: -50,
-    width: 200,
-    height: 200,
-    borderRadius: 999,
-    backgroundColor: '#d9ebf9',
-    opacity: 0.8,
   },
 });
 
