@@ -90,6 +90,3 @@ vendor/bundle/
 
 # Editor
 .vscode/
-
-# Watchman
-.watchmanconfig
