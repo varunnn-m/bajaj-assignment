@@ -1,97 +1,122 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# BLE Device Manager
 
-# Getting Started
+Production-oriented React Native assignment app for onboarding IoT devices over Bluetooth Low Energy.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## What the app does
 
-## Step 1: Start Metro
+- Scans BLE peripherals and filters them by service UUID prefix
+- Sorts devices by RSSI and shows signal strength live
+- Connects and pairs to a selected device
+- Persists paired devices locally with `zustand` + `react-native-mmkv`
+- Registers and deregisters devices against a mock cloud API
+- Queues sync operations offline and replays them on reconnect, retry, or restart
+- Shows per-device sync status: `synced`, `pending`, `failed`
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Stack
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native CLI
+- TypeScript
+- `react-native-ble-plx`
+- Zustand
+- MMKV
+- `@react-native-community/netinfo`
 
-```sh
-# Using npm
-npm start
+## Folder structure
 
-# OR using Yarn
-yarn start
+```txt
+components/
+hooks/
+screens/
+services/
+  api/
+  ble/
+  storage/
+store/
+types/
+utils/
 ```
 
-## Step 2: Build and run your app
+## Setup
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+1. Install JavaScript dependencies:
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+npm install
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+2. Install Ruby gems:
 
 ```sh
 bundle install
 ```
 
-Then, and every time you update your native dependencies, run:
+3. Install iOS pods:
 
 ```sh
+cd ios
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+4. Start Metro:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm start
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+5. Run the app:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```sh
+npm run android
+```
 
-## Step 3: Modify your app
+```sh
+npm run ios
+```
 
-Now that you have successfully run the app, let's make changes!
+## BLE behavior
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- The scan layer filters advertisements by `TARGET_SERVICE_UUID_PREFIX` in `utils/constants.ts`.
+- Scan results are updated in a single BLE store and rendered by RSSI descending.
+- On Android the app requests `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, and `ACCESS_FINE_LOCATION`.
+- On iOS the first BLE access triggers the platform prompt; denied access routes the user to Settings.
+- Connected devices are monitored for unexpected disconnects and marked disconnected without crashing the app.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Cloud sync and offline queue
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+- `services/api/mockDeviceApi.ts` simulates async cloud registration and deregistration.
+- Requests use random delay and random failures to exercise retry behavior.
+- Failed `REGISTER` and `DEREGISTER` operations are added to a persistent queue.
+- The queue is replayed in order and retried with backoff when the app is online.
+- `REGISTER` failures update the paired device sync badge to `pending` or `failed`.
 
-## Congratulations! :tada:
+## Architecture notes
 
-You've successfully run and modified your React Native App. :partying_face:
+- `bleStore` is the single source of truth for scan and Bluetooth state.
+- `deviceStore` owns paired device data and sync badges.
+- `syncStore` owns the durable mutation queue and connectivity state.
+- Hooks orchestrate behavior:
+  - `useBLE` handles scan, pair, unpair, lifecycle, and BLE error state
+  - `usePermissions` centralizes runtime permission flows and settings deep-links
+  - `useSyncQueue` replays queued cloud mutations on restart and reconnect
+- UI components are presentational and do not contain business logic.
 
-### Now what?
+## Tests
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Run:
 
-# Troubleshooting
+```sh
+npm test -- --runInBand
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Included coverage focuses on:
 
-# Learn More
+- queue creation, retries, and ordering
+- paired-device state updates
 
-To learn more about React Native, take a look at the following resources:
+## Assumptions
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- The BLE peripherals advertise at least one service UUID matching the configured prefix.
+- Bonding and passkey exchange are handled by the system Bluetooth stack where required.
+- Unpairing removes the device locally immediately; if cloud deregistration fails, the app queues the deletion and surfaces that state via message rather than restoring the local record.
+- Mock cloud registration is intentionally unreliable to prove queue replay logic.

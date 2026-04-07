@@ -36,7 +36,7 @@
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>We use Bluetooth to connect to nearby devices</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>We use your location permission on iOS to improve Bluetooth device discovery for nearby hardware.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
