@@ -1,0 +1,95 @@
+# macOS
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Temp
+*.tmp
+
+# Node
+node_modules/
+
+# React Native / Metro
+.metro-health-check*
+metro-cache/
+.expo/
+dist/
+
+# Test
+coverage/
+
+# Bundles
+*.jsbundle
+
+# Env
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# iOS / Xcode
+ios/build/
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.xcuserstate
+**/.xcode.env.local
+
+# CocoaPods
+ios/Pods/
+
+# Android
+.gradle/
+android/app/build/
+android/build/
+local.properties
+*.iml
+*.hprof
+.idea/
+.cxx/
+.kotlin/
+*.keystore
+!android/app/debug.keystore
+
+# Ruby
+.bundle/
+vendor/bundle/
+
+# fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots/
+**/fastlane/test_output/
+
+# Yarn modern
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Editor
+.vscode/
+
+# Watchman
+.watchmanconfig
