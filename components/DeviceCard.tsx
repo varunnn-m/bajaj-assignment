@@ -30,13 +30,14 @@ export function DeviceCard(props: DeviceCardProps) {
   const {device, loading = false, onPress, variant} = props;
   const isPaired = variant === 'paired';
   const actionLabel = variant === 'scan' ? props.actionLabel ?? 'Tap to pair' : null;
+  const identifier = device.serviceUUIDs?.length ? device.serviceUUIDs : device.id;
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.headerRow}>
         <View style={styles.grow}>
           <Text style={styles.name}>{device.name}</Text>
-          <Text style={styles.identifier}>{device.id}</Text>
+          <Text style={styles.identifier}>{identifier}</Text>
         </View>
         {loading ? (
           <ActivityIndicator color="#0f6cbd" />

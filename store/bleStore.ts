@@ -3,17 +3,24 @@ import { create } from 'zustand';
 
 import { ScannedDevice } from '../types/device';
 
+const UNNAMED_BLE_DEVICE = 'Unnamed BLE Device';
+
 export function upsertScannedDeviceRecord(
   scannedDevices: Record<string, ScannedDevice>,
   device: ScannedDevice,
 ): Record<string, ScannedDevice> {
   const existingDevice = scannedDevices[device.id];
+  const nextName =
+    device.name === UNNAMED_BLE_DEVICE && existingDevice?.name
+      ? existingDevice.name
+      : device.name;
 
   return {
     ...scannedDevices,
     [device.id]: {
       ...existingDevice,
       ...device,
+      name: nextName,
       discoveredAt: existingDevice?.discoveredAt ?? device.discoveredAt,
     },
   };

@@ -37,20 +37,43 @@ export function ScanScreen({
   onOpenSettings: () => void;
 }) {
   const [uuidFilter, setUuidFilter] = useState('');
+  const [rssiSort, setRssiSort] = useState<'none' | 'asc' | 'desc'>('none');
   const deferredDevices = useDeferredValue(devices);
   const filteredDevices = useMemo(() => {
     const normalizedFilter = uuidFilter.trim().toLowerCase();
+    const baseDevices = !normalizedFilter
+      ? deferredDevices
+      : deferredDevices.filter(device =>
+          device.serviceUUIDs?.some(uuid =>
+            uuid.toLowerCase().startsWith(normalizedFilter),
+          ),
+        );
 
-    if (!normalizedFilter) {
-      return deferredDevices;
+    if (rssiSort === 'none') {
+      return baseDevices;
     }
 
-    return deferredDevices.filter(device =>
-      device.serviceUUIDs?.some(uuid =>
-        uuid.toLowerCase().startsWith(normalizedFilter),
-      ),
-    );
-  }, [deferredDevices, uuidFilter]);
+    return [...baseDevices].sort((left, right) => {
+      if (left.rssi == null && right.rssi == null) {
+        return 0;
+      }
+
+      if (left.rssi == null) {
+        return 1;
+      }
+
+      if (right.rssi == null) {
+        return -1;
+      }
+
+      return rssiSort === 'desc'
+        ? right.rssi - left.rssi
+        : left.rssi - right.rssi;
+    });
+  }, [deferredDevices, rssiSort, uuidFilter]);
+
+  const sortLabel =
+    rssiSort === 'desc' ? 'RSSI ↓' : rssiSort === 'asc' ? 'RSSI ↑' : 'RSSI';
 
   return (
     <View style={styles.container}>
@@ -101,15 +124,39 @@ export function ScanScreen({
             {lastBleError ? <Text style={styles.errorText}>{lastBleError}</Text> : null}
 
             {deferredDevices.length > 0 ? (
-              <TextInput
-                value={uuidFilter}
-                onChangeText={setUuidFilter}
-                placeholder="Filter by UUID prefix"
-                placeholderTextColor="#7b8da1"
-                autoCapitalize="none"
-                autoCorrect={false}
-                style={styles.filterInput}
-              />
+              <View style={styles.filterRow}>
+                <TextInput
+                  value={uuidFilter}
+                  onChangeText={setUuidFilter}
+                  placeholder="Filter by UUID prefix"
+                  placeholderTextColor="#7b8da1"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={styles.filterInput}
+                />
+                <Pressable
+                  style={[
+                    styles.sortButton,
+                    rssiSort !== 'none' && styles.sortButtonActive,
+                  ]}
+                  onPress={() => {
+                    setRssiSort(current =>
+                      current === 'none'
+                        ? 'desc'
+                        : current === 'desc'
+                          ? 'asc'
+                          : 'none',
+                    );
+                  }}>
+                  <Text
+                    style={[
+                      styles.sortButtonText,
+                      rssiSort !== 'none' && styles.sortButtonTextActive,
+                    ]}>
+                    {sortLabel}
+                  </Text>
+                </Pressable>
+              </View>
             ) : null}
           </View>
         }
@@ -212,6 +259,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   filterInput: {
+    flex: 1,
     backgroundColor: '#ffffff',
     borderRadius: 16,
     borderWidth: 1,
@@ -220,6 +268,33 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     color: '#13324b',
     fontSize: 15,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  sortButton: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#d8e2ec',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sortButtonActive: {
+    backgroundColor: '#dceeff',
+    borderColor: '#8bbcf0',
+  },
+  sortButtonText: {
+    color: '#13324b',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  sortButtonTextActive: {
+    color: '#0f6cbd',
   },
   listContent: {
     gap: 12,
