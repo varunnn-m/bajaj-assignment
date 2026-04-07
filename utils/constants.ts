@@ -1,4 +1,3 @@
-export const TARGET_SERVICE_UUID_PREFIX = '0000';
 export const BLE_CONNECTION_TIMEOUT_MS = 15000;
 export const MOCK_API_MIN_DELAY_MS = 600;
 export const MOCK_API_MAX_DELAY_MS = 1500;

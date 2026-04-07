@@ -93,7 +93,7 @@ function AppShell() {
           onPress={() => {
             Linking.openSettings().catch(() => undefined);
           }}>
-          Need to change Bluetooth or location permissions? Open Settings.
+          {'Need to change Bluetooth or location permissions?\nOpen Settings.'}
         </Text>
       </View>
     </SafeAreaView>

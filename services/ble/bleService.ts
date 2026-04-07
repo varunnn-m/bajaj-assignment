@@ -8,21 +8,13 @@ import {
 } from 'react-native-ble-plx';
 import { Platform } from 'react-native';
 
-import { BLE_CONNECTION_TIMEOUT_MS, TARGET_SERVICE_UUID_PREFIX } from '../../utils/constants';
+import { BLE_CONNECTION_TIMEOUT_MS } from '../../utils/constants';
 import { PairedDevice, ScannedDevice } from '../../types/device';
 
 const bleManager = new BleManager();
 
 function normalizeServiceUUIDs(serviceUUIDs: string[] | null | undefined): string[] {
   return (serviceUUIDs ?? []).map(uuid => uuid.toLowerCase());
-}
-
-export function deviceMatchesPrefix(device: Device): boolean {
-  const serviceUUIDs = normalizeServiceUUIDs(device.serviceUUIDs);
-
-  return serviceUUIDs.some(uuid =>
-    uuid.startsWith(TARGET_SERVICE_UUID_PREFIX.toLowerCase()),
-  );
 }
 
 export function toScannedDevice(device: Device): ScannedDevice {
@@ -62,7 +54,7 @@ export function startBleScan(
       return;
     }
 
-    if (!device || !deviceMatchesPrefix(device)) {
+    if (!device) {
       return;
     }
 

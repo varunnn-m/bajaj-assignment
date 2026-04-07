@@ -1,15 +1,16 @@
-import React, { useDeferredValue } from 'react';
+import React, { useDeferredValue, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 
 import { DeviceCard } from '../components/DeviceCard';
 import { PermissionNotice } from '../components/PermissionNotice';
-import { APP_COPY, TARGET_SERVICE_UUID_PREFIX } from '../utils/constants';
+import { APP_COPY } from '../utils/constants';
 import { ScannedDevice } from '../types/device';
 
 export function ScanScreen({
@@ -33,7 +34,21 @@ export function ScanScreen({
   onPair: (device: ScannedDevice) => void;
   onOpenSettings: () => void;
 }) {
+  const [uuidFilter, setUuidFilter] = useState('');
   const deferredDevices = useDeferredValue(devices);
+  const filteredDevices = useMemo(() => {
+    const normalizedFilter = uuidFilter.trim().toLowerCase();
+
+    if (!normalizedFilter) {
+      return deferredDevices;
+    }
+
+    return deferredDevices.filter(device =>
+      device.serviceUUIDs?.some(uuid =>
+        uuid.toLowerCase().startsWith(normalizedFilter),
+      ),
+    );
+  }, [deferredDevices, uuidFilter]);
 
   return (
     <View style={styles.container}>
@@ -41,8 +56,7 @@ export function ScanScreen({
         <Text style={styles.eyebrow}>BLE Onboarding</Text>
         <Text style={styles.title}>Discover nearby field devices</Text>
         <Text style={styles.subtitle}>
-          Filtering advertisements by service UUID prefix `{TARGET_SERVICE_UUID_PREFIX}` and
-          ranking by strongest signal first.
+          Scanning all nearby BLE devices. Optionally filter by service UUID prefix.
         </Text>
         <View style={styles.controlsRow}>
           <Pressable
@@ -58,7 +72,7 @@ export function ScanScreen({
           </Pressable>
           <View style={styles.scanPill}>
             <Text style={styles.scanPillText}>
-              {isScanning ? 'Scanning live' : 'Idle'}
+              Current status: {isScanning ? 'Scanning live' : 'Idle'}
             </Text>
           </View>
         </View>
@@ -74,8 +88,20 @@ export function ScanScreen({
 
       {lastBleError ? <Text style={styles.errorText}>{lastBleError}</Text> : null}
 
+      {deferredDevices.length > 0 ? (
+        <TextInput
+          value={uuidFilter}
+          onChangeText={setUuidFilter}
+          placeholder="Filter by UUID prefix"
+          placeholderTextColor="#7b8da1"
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={styles.filterInput}
+        />
+      ) : null}
+
       <FlatList
-        data={deferredDevices}
+        data={filteredDevices}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({item}) => (
@@ -88,10 +114,10 @@ export function ScanScreen({
         )}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No matching BLE devices yet</Text>
+            <Text style={styles.emptyTitle}>No BLE devices found</Text>
             <Text style={styles.emptyText}>
-              Start a scan and make sure the IoT device is powered on and advertising the
-              expected service UUID prefix.
+              Start a scan and make sure nearby Bluetooth peripherals are powered on and
+              advertising.
             </Text>
           </View>
         }
@@ -166,6 +192,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     lineHeight: 18,
+  },
+  filterInput: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#d8e2ec',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    color: '#13324b',
+    fontSize: 15,
   },
   listContent: {
     gap: 12,

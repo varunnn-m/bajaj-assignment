@@ -76,7 +76,7 @@ npm run ios
 
 ## BLE behavior
 
-- The scan layer filters advertisements by `TARGET_SERVICE_UUID_PREFIX` in `utils/constants.ts`.
+- The scan layer collects all nearby BLE devices and leaves any UUID prefix filtering to the UI.
 - Scan results are updated in a single BLE store and rendered by RSSI descending.
 - On Android the app requests `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, and `ACCESS_FINE_LOCATION`.
 - On iOS the first BLE access triggers the platform prompt; denied access routes the user to Settings.
