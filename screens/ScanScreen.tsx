@@ -171,10 +171,13 @@ export function ScanScreen({
         )}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No BLE devices found</Text>
+            <Text style={styles.emptyTitle}>
+              {isScanning ? 'No BLE devices found' : 'Start scanning to see devices'}
+            </Text>
             <Text style={styles.emptyText}>
-              Start a scan and make sure nearby Bluetooth peripherals are powered on and
-              advertising.
+              {isScanning
+                ? 'Make sure nearby Bluetooth peripherals are powered on and advertising.'
+                : 'Tap Start Scan to discover nearby Bluetooth peripherals.'}
             </Text>
           </View>
         }

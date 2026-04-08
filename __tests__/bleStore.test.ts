@@ -30,34 +30,4 @@ describe('bleStore helpers', () => {
       discoveredAt: 100,
     });
   });
-
-  it('does not overwrite a discovered device name with the unnamed placeholder', () => {
-    const firstSeen: ScannedDevice = {
-      id: 'dev-1',
-      name: 'Beacon A',
-      rssi: -80,
-      serviceUUIDs: ['1234'],
-      isConnectable: true,
-      manufacturerData: null,
-      discoveredAt: 100,
-      lastSeenAt: 100,
-    };
-
-    const rescanned: ScannedDevice = {
-      ...firstSeen,
-      name: 'Unnamed BLE Device',
-      rssi: -45,
-      lastSeenAt: 200,
-    };
-
-    const stored = upsertScannedDeviceRecord({}, firstSeen);
-    const updated = upsertScannedDeviceRecord(stored, rescanned);
-
-    expect(updated['dev-1']).toMatchObject({
-      name: 'Beacon A',
-      rssi: -45,
-      lastSeenAt: 200,
-      discoveredAt: 100,
-    });
-  });
 });

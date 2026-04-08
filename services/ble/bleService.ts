@@ -36,9 +36,11 @@ export function toPairedDevice(
   device: Device,
   scanned?: ScannedDevice
 ): PairedDevice {
+  const connectedName = device.name?.trim();
+
   return {
     id: device.id,
-    name: scanned?.name || device.name || 'Unnamed BLE Device',
+    name: connectedName || scanned?.name || 'Unnamed BLE Device',
 
     serviceUUIDs: normalizeServiceUUIDs(device.serviceUUIDs),
     pairedAt: Date.now(),

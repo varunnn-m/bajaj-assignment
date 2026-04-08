@@ -136,19 +136,16 @@ export function useBLE() {
 
     try {
       const pairedDevice = await connectToPeripheral(device.id, device);
-      const resolvedName =
-        device.name === 'Unnamed BLE Device' ? pairedDevice.name : device.name;
 
       upsertPairedDevice({
         ...pairedDevice,
-        name: resolvedName,
         serviceUUIDs: device.serviceUUIDs,
         rssi: device.rssi,
         lastSeenAt: Date.now(),
       });
       upsertScannedDevice({
         ...device,
-        name: resolvedName,
+        name: pairedDevice.name,
         lastSeenAt: Date.now(),
       });
       attachDisconnectMonitor(device.id);
@@ -159,7 +156,7 @@ export function useBLE() {
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Cloud registration failed.';
-        enqueue(createPendingAction('REGISTER', device.id, resolvedName));
+        enqueue(createPendingAction('REGISTER', device.id, pairedDevice.name));
         setSyncStatus(device.id, 'pending', message);
       }
     } catch (error) {
