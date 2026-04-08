@@ -41,12 +41,18 @@ export function ScanScreen({
   const deferredDevices = useDeferredValue(devices);
   const filteredDevices = useMemo(() => {
     const normalizedFilter = uuidFilter.trim().toLowerCase();
+    const compactFilter = normalizedFilter.replace(/[^a-z0-9]/g, '');
     const baseDevices = !normalizedFilter
       ? deferredDevices
       : deferredDevices.filter(device =>
           device.serviceUUIDs?.some(uuid =>
             uuid.toLowerCase().startsWith(normalizedFilter),
-          ),
+          ) ||
+          device.id.toLowerCase().startsWith(normalizedFilter) ||
+          device.id
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+            .startsWith(compactFilter),
         );
 
     if (rssiSort === 'none') {
