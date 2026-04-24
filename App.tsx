@@ -46,7 +46,7 @@ function AppShell() {
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.headerEyebrow}>Bajaj Assignment</Text>
+          <Text style={styles.headerEyebrow}>Bluetooth Connection Project</Text>
           <Text style={styles.headerTitle}>BLE Device Manager</Text>
         </View>
 
