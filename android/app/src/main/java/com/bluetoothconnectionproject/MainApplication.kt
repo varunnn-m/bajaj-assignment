@@ -1,4 +1,4 @@
-package com.bajajassignment
+package com.bluetoothconnectionproject
 
 import android.app.Application
 import com.facebook.react.PackageList
